@@ -15,6 +15,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# USAGE: sms_convertor -[SMS source type] [filename] -[SMS source type] [filename] ... [output filename]
+# 				where [SMS source type] may be iphone, android, or webos
+#
+# EXAMPLE: sms_convertor -iphone 3d0d7e5fb2ce288813306e4d4636395e047a3d28 -webos PalmDatabase.db3
+#  				-android backup.xml output.xml
+#
+# This script can accept any number of input files:
+#	-iphone: iPhone SMS/iMessage sqlite files (for instructions on how to retrieve this, look online)
+#	-webos: PalmDatabase.db3 files from WebOS (for instructions on how to retrieve this, look online)
+#	-android: XML files produced by SMS Backup & Restore for Android (by Ritesh Sahu)
+#
+# Output is written in the same XML format used by SMS Backup & Restore
+
 from pyquery import PyQuery as pq
 import re
 import codecs
