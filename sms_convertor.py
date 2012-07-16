@@ -20,17 +20,12 @@ import re
 import codecs
 import sqlite3
 import cgi
+import sys
 from htmlentitydefs import codepoint2name
 from datetime import datetime
 from datetime import timedelta
 
-#ARGS = sys.argv
-ARGS = [
-'-android', '/Users/sahil/Development/Android/sdcard-backup/SMSBackupRestore/sms-20120715001553.xml',
-'-iphone', '/Users/sahil/Development/Android/iphone_sms.sqlite',
-'-webos', '/Users/sahil/Development/Palm/palm database/First/PalmDatabase.db3',
-'-webos', '/Users/sahil/Development/Palm/palm database/3-15-2011/PalmDatabase.db3',
-'/Users/sahil/Development/Android/sms_convertor/combined.xml']
+ARGS = sys.argv
 
 IPHONE_SELECT = 'select * from message'
 WEBOS_SELECT = 'select com_palm_pim_Recipient.address, com_palm_pim_FolderEntry.smsClass, \
