@@ -29,9 +29,9 @@ Requires <code>pyquery</code> and <code>sqlite3</code> python modules.
 Usage
 -----
 
-<pre><code>sms_convertor.py -[SMS source type] [filename] -[SMS source type] [filename] ... [output filename]</code></pre>
+<pre><code>sms_convertor.py -[source type flag] [filename] -[source type flag] [filename] ... [output filename]</code></pre>
 
-where <code>[SMS source type]</code> may be <code>iphone</code>, <code>android</code>, or <code>webos</code>
+where <code>[source type flag]</code> may be <code>iphone</code>, <code>android</code>, or <code>webos</code>
 
 Example:
 <pre><code>sms_convertor.py -iphone 3d0d7e5fb2ce288813306e4d4636395e047a3d28 -webos PalmDatabase.db3
