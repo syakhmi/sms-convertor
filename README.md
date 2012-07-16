@@ -1,7 +1,7 @@
 sms-convertor
 =============
 
-Reads in SMS messages from various database and backup formats and outputs them in SMS Backup &amp; Restore's XML format. This script can be used to help transfer old text messages (currently from iOS and WebOS devices) to an Android phone, but can also be used as a starting point for an archival tool.
+Reads in SMS messages from various database and backup formats and outputs them in the XML format used by Ritesh Sahu's <a href="https://play.google.com/store/apps/details?id=com.riteshsahu.SMSBackupRestore">SMS Backup &amp; Restore</a>. This script can be used to help transfer old text messages (currently from iOS and WebOS devices) to an Android phone, but can also be used as a starting point for an archival tool.
 
 License
 -------
@@ -41,7 +41,7 @@ This script can accept any number of input files:
 <ul>
 	<li>-iphone: iPhone SMS/iMessage sqlite files (for instructions on how to retrieve this, look online)
 	<li>-webos: PalmDatabase.db3 files from WebOS (for instructions on how to retrieve this, look online)
-	<li>-android: XML files produced by SMS Backup &amp; Restore for Android (by Ritesh Sahu)
+	<li>-android: XML files produced by SMS Backup &amp; Restore for Android
 </ul>
 
 Output is written in the same XML format used by SMS Backup &amp; Restore
