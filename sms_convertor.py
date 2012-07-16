@@ -2,6 +2,19 @@
 # coding: UTF-8
 # version: 2.7
 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 from pyquery import PyQuery as pq
 import re
 import codecs
@@ -27,6 +40,7 @@ com_palm_pim_FolderEntry.messageText from com_palm_pim_FolderEntry \
 join com_palm_pim_Recipient on (com_palm_pim_FolderEntry.id = \
 com_palm_pim_Recipient.com_palm_pim_FolderEntry_id) \
 where messageType="SMS" order by timeStamp;'
+MADRID_OFFSET = 978307200
 
 def ParseMillis(millis):
 	time = str(millis)
@@ -132,7 +146,7 @@ for file_name in iphone:
 				elif madrid_flags == 36869 or madrid_flags == 45061:
 					sms_type = 2
 			if row['is_madrid']:
-				date = date + 978307200
+				date = date + MADRID_OFFSET
 				address = row['madrid_handle']
 			sms = SMS(address, date*1000, 0, sms_type, row['text'])
 			smss.append(sms)
@@ -159,10 +173,12 @@ for file_name in webos:
 #order sms messages by timestamp
 smss.sort(cmp=sms_compare)
 
+#Generate new document tree with sms messages
 smses = d('<smses/>').attr('count', str(len(smss)))
 for sms in smss:
 	smses.append(sms.ToXML(d))
 
+#Write serialized XML file
 f = codecs.open(output_file, 'w', 'utf-8')
 f.write(smses.outerHtml().encode('ascii', 'xmlcharrefreplace'))
 f.close()
