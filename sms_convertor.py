@@ -192,7 +192,9 @@ def main(args):
 
 	#Write serialized XML file
 	f = codecs.open(output_file, 'w', 'utf-8')
-	f.write(smses.outerHtml().encode('ascii', 'xmlcharrefreplace').replace('\n', '&#10;'))
+	xml = smses.outerHtml() #serialize
+	xml = xml.encode('ascii', 'xmlcharrefreplace').replace('\n', '&#10;') #escape chars
+	f.write(xml)
 	f.close()
 
 if __name__ == '__main__':
