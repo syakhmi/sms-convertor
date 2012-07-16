@@ -40,8 +40,6 @@ from htmlentitydefs import codepoint2name
 from datetime import datetime
 from datetime import timedelta
 
-ARGS = sys.argv[1:]
-
 IPHONE_SELECT = 'select * from message'
 WEBOS_SELECT = 'select com_palm_pim_Recipient.address, com_palm_pim_FolderEntry.smsClass, \
 com_palm_pim_Recipient.firstName, com_palm_pim_Recipient.lastName, \
@@ -93,105 +91,109 @@ class SMS:
 #             BEGIN PROGRAM             #
 #########################################
 
-curr_flag = ''
-output_file = ''
-android = []
-iphone = []
-webos = []
-for arg in ARGS:
-	if arg[:1] == '-':
-		curr_flag = arg
-	else:
-		if curr_flag == '-android':
-			android.append(arg)
-		elif curr_flag == '-iphone':
-			iphone.append(arg)
-		elif curr_flag == '-webos':
-			webos.append(arg)
-		elif curr_flag:
-			print 'Unrecognized flag: ' + arg
-			sys.exit(1)
+def main(args):
+	curr_flag = ''
+	output_file = ''
+	android = []
+	iphone = []
+	webos = []
+	for arg in args:
+		if arg[:1] == '-':
+			curr_flag = arg
 		else:
-			if not output_file:
-				output_file = arg
-			else:
-				print 'Extra argument: ' + arg
+			if curr_flag == '-android':
+				android.append(arg)
+			elif curr_flag == '-iphone':
+				iphone.append(arg)
+			elif curr_flag == '-webos':
+				webos.append(arg)
+			elif curr_flag:
+				print 'Unrecognized flag: ' + arg
 				sys.exit(1)
-		curr_flag = ''
+			else:
+				if not output_file:
+					output_file = arg
+				else:
+					print 'Extra argument: ' + arg
+					sys.exit(1)
+			curr_flag = ''
 
-smss = []
+	smss = []
 
-# Iterate through each Android SMSBackupAndRestore-formatted XML
-# file and append sms messages.
-for file_name in android:
-	f = open(file_name, 'r')
-	d = pq(f.read())
-	def add_sms_element(i, e):
-		e = d(e)
-		sms = SMS(e.attr('address'), long(e.attr('date')), long(e.attr('date_sent')), \
-			int(e.attr('type')), e.attr('body'), e.attr('status'))
-		smss.append(sms)
+	# Iterate through each Android SMSBackupAndRestore-formatted XML
+	# file and append sms messages.
+	for file_name in android:
+		f = open(file_name, 'r')
+		d = pq(f.read())
+		def add_sms_element(i, e):
+			e = d(e)
+			sms = SMS(e.attr('address'), long(e.attr('date')), long(e.attr('date_sent')), \
+				int(e.attr('type')), e.attr('body'), e.attr('status'))
+			smss.append(sms)
 
-	posts = d('sms')
-	posts.each(add_sms_element)
+		posts = d('sms')
+		posts.each(add_sms_element)
+		f.close()
+
+	# Iterate through each iPhone SMS/iMessage database
+	# file and append sms messages.
+	for file_name in iphone:
+		conn = sqlite3.connect(file_name)
+		conn.row_factory = sqlite3.Row
+		c = conn.cursor()
+		for row in c.execute(IPHONE_SELECT).fetchall():
+			if row['text']:
+				sms_type = -1
+				flags = int(row['flags'])
+				date = long(row['date'])
+				address = re.sub(r'[\s\-\(\)]', '', str(row['address']))
+				if flags == 2:
+					sms_type = 1
+				elif flags == 3:
+					sms_type = 2
+				elif flags == 0:
+					madrid_flags = int(row['madrid_flags'])
+					if madrid_flags == 12289:
+						sms_type = 1
+					elif madrid_flags == 36869 or madrid_flags == 45061:
+						sms_type = 2
+				if row['is_madrid']:
+					date = date + MADRID_OFFSET
+					address = row['madrid_handle']
+				sms = SMS(address, date*1000, 0, sms_type, row['text'])
+				smss.append(sms)
+		conn.close()
+
+	# Iterate through each PalmDatabase.db3
+	# file and append sms messages.
+	for file_name in webos:
+		conn = sqlite3.connect(file_name)
+		conn.row_factory = sqlite3.Row
+		c = conn.cursor()
+		for row in c.execute(WEBOS_SELECT).fetchall():
+			if row['messageText']:
+				sms_type = '-1'
+				if row['smsClass'] == 2:
+					sms_type = 1
+				elif row['smsClass'] == 0:
+					sms_type = 2
+				address = re.sub(r'[\s\-\(\)]', '', str(row['address']))
+				sms = SMS(address, row['timeStamp'], 0, sms_type, row['messageText'])
+				smss.append(sms)
+		conn.close()
+
+	#order sms messages by timestamp
+	smss.sort(cmp=sms_compare)
+
+	#Generate new document tree with sms messages
+	smses = d('<smses/>').attr('count', str(len(smss)))
+	for sms in smss:
+		smses.append(sms.ToXML(d))
+
+	#Write serialized XML file
+	f = codecs.open(output_file, 'w', 'utf-8')
+	f.write(smses.outerHtml().encode('ascii', 'xmlcharrefreplace'))
 	f.close()
 
-# Iterate through each iPhone SMS/iMessage database
-# file and append sms messages.
-for file_name in iphone:
-	conn = sqlite3.connect(file_name)
-	conn.row_factory = sqlite3.Row
-	c = conn.cursor()
-	for row in c.execute(IPHONE_SELECT).fetchall():
-		if row['text']:
-			sms_type = -1
-			flags = int(row['flags'])
-			date = long(row['date'])
-			address = re.sub(r'[\s\-\(\)]', '', str(row['address']))
-			if flags == 2:
-				sms_type = 1
-			elif flags == 3:
-				sms_type = 2
-			elif flags == 0:
-				madrid_flags = int(row['madrid_flags'])
-				if madrid_flags == 12289:
-					sms_type = 1
-				elif madrid_flags == 36869 or madrid_flags == 45061:
-					sms_type = 2
-			if row['is_madrid']:
-				date = date + MADRID_OFFSET
-				address = row['madrid_handle']
-			sms = SMS(address, date*1000, 0, sms_type, row['text'])
-			smss.append(sms)
-	conn.close()
-
-# Iterate through each PalmDatabase.db3
-# file and append sms messages.
-for file_name in webos:
-	conn = sqlite3.connect(file_name)
-	conn.row_factory = sqlite3.Row
-	c = conn.cursor()
-	for row in c.execute(WEBOS_SELECT).fetchall():
-		if row['messageText']:
-			sms_type = '-1'
-			if row['smsClass'] == 2:
-				sms_type = 1
-			elif row['smsClass'] == 0:
-				sms_type = 2
-			address = re.sub(r'[\s\-\(\)]', '', str(row['address']))
-			sms = SMS(address, row['timeStamp'], 0, sms_type, row['messageText'])
-			smss.append(sms)
-	conn.close()
-
-#order sms messages by timestamp
-smss.sort(cmp=sms_compare)
-
-#Generate new document tree with sms messages
-smses = d('<smses/>').attr('count', str(len(smss)))
-for sms in smss:
-	smses.append(sms.ToXML(d))
-
-#Write serialized XML file
-f = codecs.open(output_file, 'w', 'utf-8')
-f.write(smses.outerHtml().encode('ascii', 'xmlcharrefreplace'))
-f.close()
+if __name__ == '__main__':
+    main(sys.argv[1:])
