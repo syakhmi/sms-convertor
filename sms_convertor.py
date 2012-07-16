@@ -17,8 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
-# USAGE: sms_convertor.py -[SMS source type] [filename] -[SMS source type] [filename] ... [output filename]
-# 			where [SMS source type] may be iphone, android, or webos
+# USAGE: sms_convertor.py -[source type flag] [filename] -[source type flag] [filename] ... [output filename]
+# 			where [source type flag] may be iphone, android, or webos
 # 
 # EXAMPLE: sms_convertor.py -iphone 3d0d7e5fb2ce288813306e4d4636395e047a3d28 -webos PalmDatabase.db3
 #  			-android backup.xml output.xml
@@ -74,7 +74,9 @@ class SMS:
 		self.status = status
 	
 	def ToXML(self, d):
-		sms = d('<sms/>').attr('protocol', '0').attr('subject', 'null').attr('toa', 'null').attr('sc_toa', 'null').attr('service_center', 'null').attr('read', '1').attr('status', self.status).attr('locked', '0')
+		sms = d('<sms/>').attr('protocol', '0').attr('subject', 'null') \
+			.attr('toa', 'null').attr('sc_toa', 'null').attr('service_center', 'null') \
+			.attr('read', '1').attr('status', self.status).attr('locked', '0')
 		sms.attr('date', self.date.strftime('%s%f')[:-3])
 		sms.attr('address', self.address)
 		sms.attr('readable_date', self.date.strftime("%b %e, %Y %l:%M:%S %p").replace('  ', ' '))
@@ -126,7 +128,8 @@ for file_name in android:
 	d = pq(f.read())
 	def add_sms_element(i, e):
 		e = d(e)
-		sms = SMS(e.attr('address'), long(e.attr('date')), long(e.attr('date_sent')), int(e.attr('type')), e.attr('body'), e.attr('status'))
+		sms = SMS(e.attr('address'), long(e.attr('date')), long(e.attr('date_sent')), \
+			int(e.attr('type')), e.attr('body'), e.attr('status'))
 		smss.append(sms)
 
 	posts = d('sms')
