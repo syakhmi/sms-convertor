@@ -1,7 +1,7 @@
 sms-convertor
 =============
 
-Reads in SMS messages from various database and backup formats and outputs them in SMS Backup &amp; Restore's XML format. This script can be used to help transfer old text message to an android phone, but can also be used as a starting point for an archival tool.
+Reads in SMS messages from various database and backup formats and outputs them in SMS Backup &amp; Restore's XML format. This script can be used to help transfer old text messages to an android phone, but can also be used as a starting point for an archival tool.
 
 License
 -------
