@@ -48,7 +48,7 @@ com_palm_pim_FolderEntry.messageText from com_palm_pim_FolderEntry \
 join com_palm_pim_Recipient on (com_palm_pim_FolderEntry.id = \
 com_palm_pim_Recipient.com_palm_pim_FolderEntry_id) \
 where messageType="SMS" order by timeStamp;'
-MADRID_OFFSET = 978307200
+MADRID_OFFSET = 978307200 #iMessage timestamps count seconds since 1 Jan 2001
 
 def ParseMillis(millis):
 	time = str(millis)
