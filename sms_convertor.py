@@ -181,6 +181,7 @@ def main(args):
 		conn.close()
 
 	#order sms messages by timestamp
+	#TODO: replace comparator with something less terribly inefficient
 	smss.sort(cmp=lambda x, y: int(long(x.date.strftime('%s%f')) - long(y.date.strftime('%s%f'))))
 
 	#Generate new document tree with sms messages
