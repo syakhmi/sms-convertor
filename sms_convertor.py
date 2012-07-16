@@ -49,6 +49,7 @@ join com_palm_pim_Recipient on (com_palm_pim_FolderEntry.id = \
 com_palm_pim_Recipient.com_palm_pim_FolderEntry_id) \
 where messageType="SMS" order by timeStamp;'
 MADRID_OFFSET = 978307200 #iMessage timestamps count seconds since 1 Jan 2001
+PHONE_CLEAN_REGEX = re.compile(r'[\s\-\(\)]+')
 
 def ParseMillis(millis):
 	time = str(millis)
@@ -143,7 +144,7 @@ def main(args):
 				sms_type = -1
 				flags = int(row['flags'])
 				date = long(row['date'])
-				address = re.sub(r'[\s\-\(\)]', '', str(row['address']))
+				address = PHONE_CLEAN_REGEX.sub('', str(row['address']))
 				if flags == 2:
 					sms_type = 1
 				elif flags == 3:
@@ -174,7 +175,7 @@ def main(args):
 					sms_type = 1
 				elif row['smsClass'] == 0:
 					sms_type = 2
-				address = re.sub(r'[\s\-\(\)]', '', str(row['address']))
+				address = PHONE_CLEAN_REGEX.sub('', str(row['address']))
 				sms = SMS(address, row['timeStamp'], 0, sms_type, row['messageText'])
 				smss.append(sms)
 		conn.close()
