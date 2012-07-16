@@ -51,6 +51,7 @@ where messageType="SMS" order by timeStamp;'
 MADRID_OFFSET = 978307200 #iMessage timestamps count seconds since 1 Jan 2001
 PHONE_CLEAN_REGEX = re.compile(r'[\s\-\(\)]+')
 
+#A (hacky) way to make a datetime object from milliseconds since UNIX epoch
 def ParseMillis(millis):
 	time = str(millis)
 	d = datetime.fromtimestamp(millis/1000)
@@ -60,7 +61,8 @@ def ParseMillis(millis):
 class SMS:
 	def __init__(self, address, millis, millis_sent, msg_type, text, status='-1'):
 		self.address = address
-		self.date = ParseMillis(millis)
+		self.millis = millis
+		self.date = ParseMillis(millis) #needed for readable_date
 		if millis_sent:
 			self.date_sent = ParseMillis(millis_sent)
 		else:
@@ -73,7 +75,7 @@ class SMS:
 		sms = d('<sms/>').attr('protocol', '0').attr('subject', 'null') \
 			.attr('toa', 'null').attr('sc_toa', 'null').attr('service_center', 'null') \
 			.attr('read', '1').attr('status', self.status).attr('locked', '0')
-		sms.attr('date', self.date.strftime('%s%f')[:-3])
+		sms.attr('date', str(self.millis))
 		sms.attr('address', self.address)
 		sms.attr('readable_date', self.date.strftime("%b %e, %Y %l:%M:%S %p").replace('  ', ' '))
 		if self.date_sent:
@@ -181,8 +183,7 @@ def main(args):
 		conn.close()
 
 	#order sms messages by timestamp
-	#TODO: replace comparator with something less terribly inefficient
-	smss.sort(cmp=lambda x, y: int(long(x.date.strftime('%s%f')) - long(y.date.strftime('%s%f'))))
+	smss.sort(cmp=lambda x, y: int(x.millis - y.millis))
 
 	#Generate new document tree with sms messages
 	smses = d('<smses/>').attr('count', str(len(smss)))
@@ -191,7 +192,7 @@ def main(args):
 
 	#Write serialized XML file
 	f = codecs.open(output_file, 'w', 'utf-8')
-	f.write(smses.outerHtml().encode('ascii', 'xmlcharrefreplace'))
+	f.write(smses.outerHtml().encode('ascii', 'xmlcharrefreplace').replace('\n', '&#10;'))
 	f.close()
 
 if __name__ == '__main__':
