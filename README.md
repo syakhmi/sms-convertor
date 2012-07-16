@@ -31,7 +31,7 @@ Usage
 
 <pre><code>sms_convertor.py -[SMS source type] [filename] -[SMS source type] [filename] ... [output filename]</code></pre>
 
-where [SMS source type] may be iphone, android, or webos
+where <code>[SMS source type]</code> may be <code>iphone</code>, <code>android</code>, or <code>webos</code>
 
 Example:
 <pre><code>sms_convertor.py -iphone 3d0d7e5fb2ce288813306e4d4636395e047a3d28 -webos PalmDatabase.db3
@@ -39,9 +39,9 @@ Example:
 
 This script can accept any number of input files:
 <ul>
-	<li>-iphone: iPhone SMS/iMessage sqlite files (for instructions on how to retrieve this, look online)
-	<li>-webos: PalmDatabase.db3 files from WebOS (for instructions on how to retrieve this, look online)
-	<li>-android: XML files produced by SMS Backup &amp; Restore for Android
+	<li><code>-iphone</code>: iPhone SMS/iMessage sqlite files (for instructions on how to retrieve this, look online)
+	<li><code>-webos</code>: PalmDatabase.db3 files from WebOS (for instructions on how to retrieve this, look online)
+	<li><code>-android</code>: XML files produced by SMS Backup &amp; Restore for Android
 </ul>
 
 Output is written in the same XML format used by SMS Backup &amp; Restore
