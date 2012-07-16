@@ -29,12 +29,12 @@ Requires <code>pyquery</code> and <code>sqlite3</code> python modules.
 Usage
 -----
 
-<pre><code>sms_convertor -[SMS source type] [filename] -[SMS source type] [filename] ... [output filename]</code></pre>
+<pre><code>sms_convertor.py -[SMS source type] [filename] -[SMS source type] [filename] ... [output filename]</code></pre>
 
 where [SMS source type] may be iphone, android, or webos
 
 Example:
-<pre><code>sms_convertor -iphone 3d0d7e5fb2ce288813306e4d4636395e047a3d28 -webos PalmDatabase.db3
+<pre><code>sms_convertor.py -iphone 3d0d7e5fb2ce288813306e4d4636395e047a3d28 -webos PalmDatabase.db3
  	-android backup.xml output.xml</code></pre>
 
 This script can accept any number of input files:

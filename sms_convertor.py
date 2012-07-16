@@ -17,10 +17,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
-# USAGE: sms_convertor -[SMS source type] [filename] -[SMS source type] [filename] ... [output filename]
+# USAGE: sms_convertor.py -[SMS source type] [filename] -[SMS source type] [filename] ... [output filename]
 # 			where [SMS source type] may be iphone, android, or webos
 # 
-# EXAMPLE: sms_convertor -iphone 3d0d7e5fb2ce288813306e4d4636395e047a3d28 -webos PalmDatabase.db3
+# EXAMPLE: sms_convertor.py -iphone 3d0d7e5fb2ce288813306e4d4636395e047a3d28 -webos PalmDatabase.db3
 #  			-android backup.xml output.xml
 # 
 # This script can accept any number of input files:
