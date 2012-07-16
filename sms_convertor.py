@@ -56,9 +56,6 @@ def ParseMillis(millis):
 	d = d + timedelta(microseconds=int(time[-3:])*1000)
 	return d
 
-def sms_compare(x, y):
-	return int(long(x.date.strftime('%s%f')) - long(y.date.strftime('%s%f')))
-
 class SMS:
 	def __init__(self, address, millis, millis_sent, msg_type, text, status='-1'):
 		self.address = address
@@ -183,7 +180,7 @@ def main(args):
 		conn.close()
 
 	#order sms messages by timestamp
-	smss.sort(cmp=sms_compare)
+	smss.sort(cmp=lambda x, y: int(long(x.date.strftime('%s%f')) - long(y.date.strftime('%s%f'))))
 
 	#Generate new document tree with sms messages
 	smses = d('<smses/>').attr('count', str(len(smss)))
