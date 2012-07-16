@@ -68,7 +68,7 @@ class SMS:
 		self.text = text
 		self.status = status
 	
-	def ToXML(self, d):
+	def ToXMLNode(self, d):
 		sms = d('<sms/>').attr('protocol', '0').attr('subject', 'null') \
 			.attr('toa', 'null').attr('sc_toa', 'null').attr('service_center', 'null') \
 			.attr('read', '1').attr('status', self.status).attr('locked', '0')
@@ -185,7 +185,7 @@ def main(args):
 	#Generate new document tree with sms messages
 	smses = d('<smses/>').attr('count', str(len(smss)))
 	for sms in smss:
-		smses.append(sms.ToXML(d))
+		smses.append(sms.ToXMLNode(d))
 
 	#Write serialized XML file
 	f = codecs.open(output_file, 'w', 'utf-8')
