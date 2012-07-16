@@ -40,7 +40,7 @@ from htmlentitydefs import codepoint2name
 from datetime import datetime
 from datetime import timedelta
 
-ARGS = sys.argv
+ARGS = sys.argv[1:]
 
 IPHONE_SELECT = 'select * from message'
 WEBOS_SELECT = 'select com_palm_pim_Recipient.address, com_palm_pim_FolderEntry.smsClass, \
