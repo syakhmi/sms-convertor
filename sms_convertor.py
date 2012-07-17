@@ -35,11 +35,13 @@ import re
 import codecs
 import sqlite3
 import cgi
+import os
 import sys
 from htmlentitydefs import codepoint2name
 from datetime import datetime
 from datetime import timedelta
 
+FLAGS = ['-android', '-iphone', '-webos']
 IPHONE_SELECT = 'select * from message'
 WEBOS_SELECT = 'select com_palm_pim_Recipient.address, com_palm_pim_FolderEntry.smsClass, \
 com_palm_pim_Recipient.firstName, com_palm_pim_Recipient.lastName, \
@@ -97,30 +99,34 @@ def main(args):
 	android = []
 	iphone = []
 	webos = []
+	file_lists = [android, iphone, webos]
 	for arg in args:
-		if arg[:1] == '-':
-			if curr_flag:
+		if arg[:1] == '-': #if argument is a flag
+			if curr_flag: #if previous argument was also flag
 				print >> sys.stderr, 'No filename specified for flag: ' + curr_flag
 				sys.exit(1)
-			curr_flag = arg
-		else:
-			if curr_flag == '-android':
-				android.append(arg)
-			elif curr_flag == '-iphone':
-				iphone.append(arg)
-			elif curr_flag == '-webos':
-				webos.append(arg)
-			elif curr_flag:
-				print >> sys.stderr, 'Unrecognized flag: ' + curr_flag
-				sys.exit(1)
+			if arg in FLAGS: #if argument is valid flag
+				curr_flag = arg
 			else:
-				if output_file:
-					print >> sys.stderr, 'Extra argument: ' + arg
-					sys.exit(1)
-				output_file = arg
-			curr_flag = ''
-	if curr_flag:
+				print >> sys.stderr, 'Unrecognized flag: ' + arg
+				sys.exit(1)
+		elif curr_flag: #if previous argument was a valid flag
+			if not os.path.exists(arg): #if argument is not a valid file path
+				print >> sys.stderr, 'File not found: ' + arg
+				sys.exit(1)
+			#append file path to correct file list
+			file_lists[FLAGS.index(curr_flag)].append(arg)
+			curr_flag = '' #reset to indicate in next iteration that prev arg was not a flag
+		else: #if argument is not a flag and previous argument was not a flag
+			if output_file: #if output file is already specified
+				print >> sys.stderr, 'Extra argument: ' + arg
+				sys.exit(1)
+			output_file = arg
+	if curr_flag: #if last argument was a valid flag
 		print >> sys.stderr, 'No filename specified for flag: ' + curr_flag
+		sys.exit(1)
+	if not output_file: #if not output file specified
+		print >> sys.stderr, 'No output file specified'
 		sys.exit(1)
 
 	smss = []
