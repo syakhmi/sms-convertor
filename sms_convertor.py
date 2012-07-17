@@ -197,7 +197,7 @@ def main(args):
 	smss.sort(cmp=lambda x, y: int(x.millis - y.millis))
 
 	#Generate new document tree with sms messages
-	smses = d('<smses/>').attr('count', str(len(smss)))
+	smses = pq('<smses/>').attr('count', str(len(smss)))
 	for sms in smss:
 		smses.append(sms.ToXMLNode(d))
 
