@@ -30,16 +30,16 @@
 # 
 # Output is written in the same XML format used by SMS Backup & Restore
 
-from pyquery import PyQuery as pq
-import re
 import codecs
-import sqlite3
 import cgi
 import os
+import re
+import sqlite3
 import sys
-from htmlentitydefs import codepoint2name
 from datetime import datetime
 from datetime import timedelta
+from htmlentitydefs import codepoint2name
+from pyquery import PyQuery as pq
 
 FLAGS = ['-android', '-iphone', '-webos']
 IPHONE_SELECT = 'select * from message'
