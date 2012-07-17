@@ -99,6 +99,9 @@ def main(args):
 	webos = []
 	for arg in args:
 		if arg[:1] == '-':
+			if curr_flag:
+				print >> sys.stderr, 'No filename specified for flag: ' + curr_flag
+				sys.exit(1)
 			curr_flag = arg
 		else:
 			if curr_flag == '-android':
@@ -108,14 +111,13 @@ def main(args):
 			elif curr_flag == '-webos':
 				webos.append(arg)
 			elif curr_flag:
-				print 'Unrecognized flag: ' + arg
+				print >> sys.stderr, 'Unrecognized flag: ' + curr_flag
 				sys.exit(1)
 			else:
-				if not output_file:
-					output_file = arg
-				else:
-					print 'Extra argument: ' + arg
+				if output_file:
+					print >> sys.stderr, 'Extra argument: ' + arg
 					sys.exit(1)
+				output_file = arg
 			curr_flag = ''
 
 	smss = []
