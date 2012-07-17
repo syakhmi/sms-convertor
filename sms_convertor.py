@@ -119,6 +119,9 @@ def main(args):
 					sys.exit(1)
 				output_file = arg
 			curr_flag = ''
+	if curr_flag:
+		print >> sys.stderr, 'No filename specified for flag: ' + curr_flag
+		sys.exit(1)
 
 	smss = []
 
