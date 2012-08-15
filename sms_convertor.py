@@ -18,20 +18,22 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 # USAGE: sms_convertor.py -[source type flag] [filename] -[source type flag] [filename] ... [output filename]
-# 			where [source type flag] may be iphone, android, or webos
+# 			where [source type flag] may be iphone, db3, db8, or android
 # 
-# EXAMPLE: sms_convertor.py -iphone 3d0d7e5fb2ce288813306e4d4636395e047a3d28 -webos PalmDatabase.db3
-#  			-android backup.xml output.xml
+# EXAMPLE: sms_convertor.py -iphone 3d0d7e5fb2ce288813306e4d4636395e047a3d28 -pdb3 PalmDatabase.db3
+#  			-android backup.xml -db8 response.json output.xml
 # 
 # This script can accept any number of input files:
 # 	-iphone: iPhone SMS/iMessage sqlite files (for instructions on how to retrieve this, look online)
-# 	-webos: PalmDatabase.db3 files from WebOS (for instructions on how to retrieve this, look online)
+# 	-pdb3: PalmDatabase.db3 files from WebOS 1.x (for instructions on how to retrieve this, look online)
+#	-pdb8: db8 database service responses from WebOS 2.x + (_kind : com.palm.smsmessage:1)
 # 	-android: XML files produced by SMS Backup & Restore for Android (by Ritesh Sahu)
 # 
 # Output is written in the same XML format used by SMS Backup & Restore
 
 import codecs
 import cgi
+import json
 import os
 import re
 import sqlite3
@@ -41,9 +43,9 @@ from datetime import timedelta
 from htmlentitydefs import codepoint2name
 from pyquery import PyQuery as pq
 
-FLAGS = ['-android', '-iphone', '-webos']
+FLAGS = ['-android', '-iphone', '-pdb3', '-pdb8']
 IPHONE_SELECT = 'select * from message'
-WEBOS_SELECT = 'select com_palm_pim_Recipient.address, com_palm_pim_FolderEntry.smsClass, \
+PDB3_SELECT = 'select com_palm_pim_Recipient.address, com_palm_pim_FolderEntry.smsClass, \
 com_palm_pim_Recipient.firstName, com_palm_pim_Recipient.lastName, \
 com_palm_pim_FolderEntry.fromAddress, com_palm_pim_FolderEntry.timeStamp, \
 com_palm_pim_FolderEntry.messageText from com_palm_pim_FolderEntry \
@@ -98,8 +100,9 @@ def main(args):
 	output_file = ''
 	android = []
 	iphone = []
-	webos = []
-	file_lists = [android, iphone, webos]
+	pdb3 = []
+	pdb8 = []
+	file_lists = [android, iphone, pdb3, pdb8]
 	for arg in args:
 		if arg[:1] == '-': #if argument is a flag
 			if curr_flag: #if previous argument was also flag
@@ -177,11 +180,11 @@ def main(args):
 
 	# Iterate through each PalmDatabase.db3
 	# file and append sms messages.
-	for file_name in webos:
+	for file_name in pdb3:
 		conn = sqlite3.connect(file_name)
 		conn.row_factory = sqlite3.Row
 		c = conn.cursor()
-		for row in c.execute(WEBOS_SELECT).fetchall():
+		for row in c.execute(PDB3_SELECT).fetchall():
 			if row['messageText']:
 				sms_type = '-1'
 				if row['smsClass'] == 2:
@@ -192,6 +195,26 @@ def main(args):
 				sms = SMS(address, row['timeStamp'], 0, sms_type, row['messageText'])
 				smss.append(sms)
 		conn.close()
+	
+	# Iterate through each db8 query result
+	# file and append sms messages.
+	for file_name in pdb8:
+		f = open(file_name, 'r')
+		response = json.loads(f.read())
+		for message in response['results']:
+			if message['status'] == 'successful' and message['messageText']:
+				if 'from' in message: #received
+					sms_type = 1
+					address = PHONE_CLEAN_REGEX.sub('', message['from']['addr'])
+				elif 'to' in message: #sent
+					sms_type = 2
+					to_list = message['to']
+					address = PHONE_CLEAN_REGEX.sub('', to_list[0]['addr'])
+				else: #problem with message
+					continue
+				sms = SMS(address, message['localTimestamp'], message['timestamp']*1000, sms_type, message['messageText'])
+				smss.append(sms)
+		f.close()
 
 	#order sms messages by timestamp
 	smss.sort(cmp=lambda x, y: int(x.millis - y.millis))
@@ -199,7 +222,7 @@ def main(args):
 	#Generate new document tree with sms messages
 	smses = pq('<smses/>').attr('count', str(len(smss)))
 	for sms in smss:
-		smses.append(sms.ToXMLNode(d))
+		smses.append(sms.ToXMLNode(pq))
 
 	#Write serialized XML file
 	f = codecs.open(output_file, 'w', 'utf-8')
