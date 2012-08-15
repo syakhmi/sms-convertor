@@ -40,7 +40,7 @@ Example:
 This script can accept any number of input files:
 <ul>
 	<li><code>-iphone</code>: iPhone SMS/iMessage sqlite files (for instructions on how to retrieve this, look online)
-	<li><code>-db3</code>: PalmDatabase.db3 files from WebOS (for instructions on how to retrieve this, look online)
+	<li><code>-db3</code>: PalmDatabase.db3 files from WebOS 1.x (for instructions on how to retrieve this, look online)
 	<li><code>-db8</code>: db8 database service responses from WebOS 2.x + (_kind : com.palm.smsmessage:1)
 	<li><code>-android</code>: XML files produced by SMS Backup &amp; Restore for Android
 </ul>
